@@ -3,40 +3,36 @@
   version 0.5 - initial concept
 */
 
-/**** Keyboard shortcut handler ****/
-browser.commands.onCommand.addListener((strName) => {
-	// Get current window non-hidden tabs
-	browser.tabs.query({
-		currentWindow: true,
-		hidden: false
-	}).then((arrTabs) => {
-		// Sort the tab array by position just in case it isn't already
-		console.log(arrTabs);
-		arrTabs.sort( function(a,b) {return (a.index - b.index);} )
-		console.log(arrTabs);
-		// Locate the active tab in the array
-		var nActive = arrTabs.findIndex( oTab => oTab.active === true );
-		// Make the appropriate tab active instead
-		if (strName === 'left-tab'){
-			// Figure out the tab id
-			if (nActive > 0){
-				var newId = arrTabs[nActive - 1].id;
-			} else {
-				// go to the last tab
-				newId = arrTabs[arrTabs.length - 1].id;
-			}
-			// Make it active
-			browser.tabs.update(newId, {active:true});
-		} else if (strName === 'right-tab'){
-			// Figure out the tab id
-			if (nActive < (arrTabs.length - 1)){
-				newId = arrTabs[nActive + 1].id;
-			} else {
-				// go to the first tab
-				newId = arrTabs[0].id;
-			}
-			// Make it active
-			browser.tabs.update(newId, {active:true});
-		}
-	});
-})
+const handleShortcut = async (strName) => {
+  const tabs = await browser.tabs.query({
+    currentWindow: true,
+    hidden: false
+  }).then(tabs => tabs.sort((a, b) => a.index - b.index));
+
+  const currentTab = tabs.find(_ => _.active);
+
+  const nextTab = currentTab.index === tabs.length - 1 ? tabs[0] : tabs[currentTab.index + 1]
+
+  const previousTab = currentTab.index === 0 ? tabs[tabs.length - 1] : tabs[currentTab.index - 1]
+
+  if (strName === 'pin-tab') {
+    return browser.tabs.update(currentTab.id, {
+      pinned: !currentTab.pinned
+    });
+  }
+
+  if (strName === 'left-tab') {
+    return browser.tabs.update(previousTab.id, {
+      active: true
+    });
+  }
+
+  if (strName === 'right-tab') {
+    return browser.tabs.update(nextTab.id, {
+      active: true
+    });
+  }
+  return;
+};
+
+browser.commands.onCommand.addListener(handleShortcut);

@@ -22,6 +22,12 @@
 		"128": "left-tab-right-tab.png"
 	},
 	"commands": {
+		"pin-tab": {
+			"suggested_key": {
+				"default": "Ctrl+Alt+P"
+			},
+			"description": "Pin active tab"
+		},
 		"left-tab": {
 			"suggested_key": {
 				"default": "Ctrl+Alt+Left"
